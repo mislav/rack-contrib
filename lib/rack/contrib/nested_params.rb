@@ -9,6 +9,7 @@ module Rack
     POST_BODY = 'rack.input'.freeze
     FORM_INPUT = 'rack.request.form_input'.freeze
     FORM_HASH = 'rack.request.form_hash'.freeze
+    FORM_VARS = 'rack.request.form_vars'.freeze
     
     # supported content type
     URL_ENCODED = 'application/x-www-form-urlencoded'.freeze
@@ -18,7 +19,9 @@ module Rack
     end
     
     def call(env)
-      if env[CONTENT_TYPE] == URL_ENCODED
+      if form_vars = env[FORM_VARS]
+        env[FORM_HASH] = parse_query_parameters(form_vars)
+      elsif env[CONTENT_TYPE] == URL_ENCODED
         post_body = env[POST_BODY]
         env[FORM_INPUT] = post_body
         env[FORM_HASH] = parse_query_parameters(post_body.read)
